@@ -22,7 +22,7 @@ import (
 
 const (
 	updateInstallerDesktop = `winsta0\default`
-	updateProductName      = "sing-box"
+	updateProductName      = "MXH Route"
 	seTcbPrivilege         = "SeTcbPrivilege"
 	seAssignPrimaryToken   = "SeAssignPrimaryTokenPrivilege"
 	seIncreaseQuota        = "SeIncreaseQuotaPrivilege"
@@ -64,11 +64,11 @@ func (d *Daemon) installUpdate(identity peerIdentity, installerPath string) (*In
 		return nil, status.Error(codes.InvalidArgument, E.Cause(err, "read update installer identity").Error())
 	}
 	if installerIdentity.productName != updateProductName {
-		return nil, status.Error(codes.InvalidArgument, "update executable is not a sing-box installer")
+		return nil, status.Error(codes.InvalidArgument, "update executable is not an MXH Route installer")
 	}
 	err = validateNSISExecutable(installerFinalPath)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, E.Cause(err, "update executable is not a sing-box installer").Error())
+		return nil, status.Error(codes.InvalidArgument, E.Cause(err, "update executable is not an MXH Route installer").Error())
 	}
 	installerSigner, err := authenticodeSigner(installerFinalPath, installer)
 	if err != nil {

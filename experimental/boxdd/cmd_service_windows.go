@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	serviceDisplayName             = "sing-box Custom Service"
-	serviceDescriptionText         = "Privileged service for the local sing-box Custom desktop client"
-	defaultServiceWorkingDirectory = `C:\ProgramData\sing-box-custom-daemon`
+	serviceDisplayName             = "MXH Route Service"
+	serviceDescriptionText         = "Privileged service for the MXH Route desktop client"
+	defaultServiceWorkingDirectory = `C:\ProgramData\mxh-route-daemon`
 )
 
 var commandServiceFlagAllowUnsafeInstallation bool

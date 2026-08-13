@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const serviceName = "sing-box-custom-daemon"
+const serviceName = "mxh-route-daemon"
 
 var mainCommand = &cobra.Command{
 	Use:     serviceName,

@@ -1,31 +1,20 @@
-# sing-box
+# MXH Route Core
 
-The universal proxy platform.
+Windows service integration used by the personal
+[`MXH Route`](https://github.com/mxh110708/mxh-route-desktop) distribution. This
+repository is derived from
+[`SagerNet/sing-box`](https://github.com/SagerNet/sing-box) and is not an
+official SagerNet release.
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/sing-box.svg)](https://repology.org/project/sing-box/versions)
+Only the isolated desktop service identity, IPC endpoints, executable identity,
+and signed update product check differ on the maintained `custom-main` branch.
+Protocol and Go module identifiers retain their upstream names for technical
+compatibility. General core development remains upstream's responsibility.
 
-## Documentation
+## Upstream documentation
 
 https://sing-box.sagernet.org
 
 ## License
 
-```
-Copyright (C) 2022 by nekohasekai <contact-sagernet@sekai.icu>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-In addition, no derivative work may use the name or imply association
-with this application without prior consent.
-```
+See [LICENSE](LICENSE) for the retained upstream license and naming condition.
