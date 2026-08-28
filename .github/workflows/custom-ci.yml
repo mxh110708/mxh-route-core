@@ -1,0 +1,42 @@
+name: Custom CI
+
+on:
+  push:
+    branches: [custom-main]
+  pull_request:
+    branches: [custom-main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Test customized daemon behavior
+        shell: bash
+        run: |
+          BUILD_TAGS="$(cat release/DEFAULT_BUILD_TAGS_OTHERS)"
+          LDFLAGS_SHARED="$(cat release/LDFLAGS)"
+          go test -v -tags "$BUILD_TAGS" -ldflags "$LDFLAGS_SHARED" ./daemon
+      - name: Build sing-box
+        shell: bash
+        run: |
+          BUILD_TAGS="$(cat release/DEFAULT_BUILD_TAGS_OTHERS)"
+          LDFLAGS_SHARED="$(cat release/LDFLAGS)"
+          go build -v -trimpath -tags "$BUILD_TAGS" -ldflags "$LDFLAGS_SHARED" ./cmd/sing-box
