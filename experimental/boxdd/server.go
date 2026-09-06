@@ -75,10 +75,10 @@ func newDaemon() (*Daemon, error) {
 		OOMRecorder: d.oomRecorder,
 	})
 	authorizer := newAuthorizer(d)
-	serverOptions := []grpc.ServerOption{
+	serverOptions := append(daemon.MessageSizeServerOptions(),
 		grpc.ChainUnaryInterceptor(newUnaryAuthorizeInterceptor(authorizer), daemon.UnaryLocaleInterceptor),
 		grpc.ChainStreamInterceptor(newStreamAuthorizeInterceptor(authorizer), daemon.StreamLocaleInterceptor),
-	}
+	)
 	platformOptions, err := platformServerOptions(d)
 	if err != nil {
 		return nil, err

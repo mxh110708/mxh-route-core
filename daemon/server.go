@@ -14,10 +14,10 @@ import (
 )
 
 func NewServer(startedService *StartedService, secret string) *grpc.Server {
-	server := grpc.NewServer(
+	server := grpc.NewServer(append(MessageSizeServerOptions(),
 		grpc.ChainUnaryInterceptor(newUnaryAuthInterceptor(secret), UnaryLocaleInterceptor),
 		grpc.ChainStreamInterceptor(newStreamAuthInterceptor(secret), StreamLocaleInterceptor),
-	)
+	)...)
 	healthServer := health.NewServer()
 	RegisterStartedServiceServer(server, startedService)
 	healthServer.SetServingStatus(StartedService_ServiceDesc.ServiceName, grpc_health_v1.HealthCheckResponse_SERVING)

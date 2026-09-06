@@ -60,6 +60,7 @@ func NewRemoteClient(options RemoteClientOptions) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 	return grpc.NewClient(target,
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(MaxMessageBytes), grpc.MaxCallSendMsgSize(MaxMessageBytes)),
 		grpc.WithTransportCredentials(transportCredentials),
 		grpc.WithChainUnaryInterceptor(UnaryClientLocaleInterceptor, NewClientAuthUnaryInterceptor(options.Secret)),
 		grpc.WithChainStreamInterceptor(StreamClientLocaleInterceptor, NewClientAuthStreamInterceptor(options.Secret)),

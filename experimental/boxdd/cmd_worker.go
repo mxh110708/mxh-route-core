@@ -62,10 +62,10 @@ func runWorker() error {
 		return err
 	}
 	defer listener.Close()
-	server := grpc.NewServer(
+	server := grpc.NewServer(append(daemon.MessageSizeServerOptions(),
 		grpc.ChainUnaryInterceptor(daemon.UnaryLocaleInterceptor),
 		grpc.ChainStreamInterceptor(daemon.StreamLocaleInterceptor),
-	)
+	)...)
 	RegisterApplicationServiceServer(server, &applicationService{
 		startedService: daemon.NewStartedService(daemon.ServiceOptions{Context: include.Context(context.Background())}),
 	})
