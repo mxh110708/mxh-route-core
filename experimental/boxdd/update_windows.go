@@ -5,13 +5,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"unsafe"
 
 	"github.com/sagernet/sing-box/common/badversion"
-	C "github.com/sagernet/sing-box/constant"
-	"github.com/sagernet/sing-box/experimental/libbox"
 	E "github.com/sagernet/sing/common/exceptions"
 
 	"github.com/tailscale/go-winio"
@@ -80,7 +79,32 @@ func (d *Daemon) installUpdate(identity peerIdentity, installerPath string) (*In
 	if !badversion.IsValid(installerIdentity.version) {
 		return nil, status.Error(codes.InvalidArgument, "update installer has an invalid version")
 	}
-	if !libbox.CompareSemver(installerIdentity.version, C.Version) {
+	// The core version is independent of the desktop release revision.
+	daemonPath, err := os.Executable()
+	if err != nil {
+		return nil, err
+	}
+	_, applicationPath, err := installedApplicationPath(daemonPath)
+	if err != nil {
+		return nil, err
+	}
+	application, err := openLockedExecutable(applicationPath)
+	if err != nil {
+		return nil, err
+	}
+	defer windows.CloseHandle(application)
+	applicationFinalPath, err := finalWindowsPath(application)
+	if err != nil {
+		return nil, err
+	}
+	applicationIdentity, err := windowsExecutableIdentity(applicationFinalPath)
+	if err != nil {
+		return nil, E.Cause(err, "read installed application version")
+	}
+	if applicationIdentity.productName != updateProductName || !badversion.IsValid(applicationIdentity.version) {
+		return nil, status.Error(codes.FailedPrecondition, "installed application has an invalid product or version")
+	}
+	if !isNewerDesktopVersion(installerIdentity.version, applicationIdentity.version) {
 		return &InstallUpdateResponse{Result: InstallUpdateResult_INSTALL_UPDATE_RESULT_NOT_NEWER}, nil
 	}
 	installerProcess, err := launchUpdateInstaller(installerFinalPath, identity.SessionID)
