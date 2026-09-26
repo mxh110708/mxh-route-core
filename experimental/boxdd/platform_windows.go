@@ -417,9 +417,9 @@ func (p *windowsPlatformInterface) applySystemProxyLocked() error {
 		return nil
 	}
 	if p.systemProxyEnabled {
-		if p.systemProxy.IsEnabled() {
-			return nil
-		}
+		// Re-apply on explicit enable requests. IsEnabled only tracks our last
+		// successful write; another process may have changed the user's WinINET
+		// proxy since then.
 		return p.runUserOperationLocked(p.systemProxy.Enable)
 	}
 	return p.disableSystemProxyLocked()
