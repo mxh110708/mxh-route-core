@@ -60,6 +60,13 @@ func (h *managedHandler) SystemProxyStatus() (*daemon.SystemProxyStatus, error) 
 }
 
 func (h *managedHandler) SetSystemProxyEnabled(enabled bool) error {
+	return h.SetSystemProxyEnabledContext(context.Background(), enabled)
+}
+
+func (h *managedHandler) SetSystemProxyEnabledContext(ctx context.Context, enabled bool) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if h.daemon.platform == nil {
 		if !enabled {
 			return nil
@@ -75,7 +82,13 @@ func (h *managedHandler) SetSystemProxyEnabled(enabled bool) error {
 		return err
 	}
 	previousEnabled := options.systemProxyEnabled()
-	err = h.daemon.platform.SetSystemProxyEnabled(enabled)
+	if platform, ok := h.daemon.platform.(interface {
+		SetSystemProxyEnabledContext(context.Context, bool) error
+	}); ok {
+		err = platform.SetSystemProxyEnabledContext(ctx, enabled)
+	} else if err = ctx.Err(); err == nil {
+		err = h.daemon.platform.SetSystemProxyEnabled(enabled)
+	}
 	if err != nil {
 		return err
 	}

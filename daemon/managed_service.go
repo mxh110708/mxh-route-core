@@ -55,7 +55,19 @@ func (s *ManagedService) GetSystemProxyStatus(ctx context.Context, empty *emptyp
 }
 
 func (s *ManagedService) SetSystemProxyEnabled(ctx context.Context, request *SetSystemProxyEnabledRequest) (*emptypb.Empty, error) {
-	err := s.handler.SetSystemProxyEnabled(request.Enabled)
+	if err := ctx.Err(); err != nil {
+		return nil, status.FromContextError(err).Err()
+	}
+	var err error
+	// Optional for platforms/embedders that can reject a cancelled write after
+	// acquiring their OS-state lock. Keep the public handler contract compatible.
+	if handler, ok := s.handler.(interface {
+		SetSystemProxyEnabledContext(context.Context, bool) error
+	}); ok {
+		err = handler.SetSystemProxyEnabledContext(ctx, request.Enabled)
+	} else {
+		err = s.handler.SetSystemProxyEnabled(request.Enabled)
+	}
 	if err != nil {
 		return nil, err
 	}

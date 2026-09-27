@@ -325,8 +325,17 @@ func (p *windowsPlatformInterface) SystemProxyStatus() (*daemon.SystemProxyStatu
 }
 
 func (p *windowsPlatformInterface) SetSystemProxyEnabled(enabled bool) error {
+	return p.SetSystemProxyEnabledContext(context.Background(), enabled)
+}
+
+func (p *windowsPlatformInterface) SetSystemProxyEnabledContext(ctx context.Context, enabled bool) error {
 	p.access.Lock()
 	defer p.access.Unlock()
+	// A client deadline can expire while waiting for a previous lifecycle write.
+	// Do not apply that stale request after the lock becomes available.
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if p.systemProxy == nil {
 		if !enabled {
 			p.systemProxyEnabled = false
