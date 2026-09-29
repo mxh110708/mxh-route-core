@@ -79,6 +79,9 @@ func (s *HistoryStorage) Close() error {
 }
 
 func URLTest(ctx context.Context, link string, detour N.Dialer) (uint16, error) {
+	if unified, _ := ctx.Value(unifiedDelayKey{}).(bool); unified {
+		return unifiedURLTest(ctx, link, detour)
+	}
 	multiplexOutbound, isMultiplexOutbound := common.Cast[adapter.OutboundWithMultiplex](detour)
 	if isMultiplexOutbound && multiplexOutbound.MultiplexEnabled() {
 		_, err := urlTest(ctx, link, detour)

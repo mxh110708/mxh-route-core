@@ -717,19 +717,20 @@ func (s *StartedService) URLTest(ctx context.Context, request *URLTestRequest) (
 		return nil, status.Error(codes.NotFound, "outbound not found: "+outboundTag)
 	}
 	historyStorage := boxService.urlTestHistoryStorage
+	testCtx := urltest.WithUnifiedDelay(boxService.ctx)
 	urlTest, isURLTest := outbound.(*group.URLTest)
 	outboundGroup, isOutboundGroup := outbound.(adapter.OutboundGroup)
 	if isURLTest {
-		go urlTest.CheckOutbounds()
+		go func() { _, _ = urlTest.URLTest(testCtx) }()
 	} else if isOutboundGroup {
 		outbounds := common.FilterNotNil(common.Map(outboundGroup.All(), func(it string) adapter.Outbound {
 			itOutbound, _ := boxService.outboundManager.Outbound(it)
 			return itOutbound
 		}))
-		go group.URLTestOutbounds(boxService.ctx, boxService.outboundManager, historyStorage, boxService.logFactory.Logger(), outbounds, "", 0, true)
+		go group.URLTestOutbounds(testCtx, boxService.outboundManager, historyStorage, boxService.logFactory.Logger(), outbounds, "", 0, true)
 	} else {
 		go func() {
-			t, err := urltest.URLTest(boxService.ctx, "", outbound)
+			t, err := urltest.URLTest(testCtx, "", outbound)
 			if err != nil {
 				historyStorage.DeleteURLTestHistory(outboundTag)
 			} else {
