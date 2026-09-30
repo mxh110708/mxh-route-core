@@ -16,6 +16,10 @@ import (
 
 type unifiedDelayKey struct{}
 
+// DefaultUnifiedTestURL matches Clash Verge's default manual latency target.
+// Background health probes keep the independent default in urltest.go.
+const DefaultUnifiedTestURL = "http://cp.cloudflare.com/generate_204"
+
 // WithUnifiedDelay opts manual desktop URL tests into Mihomo-style warmed
 // HTTP latency. Background health probes retain their existing cold test.
 func WithUnifiedDelay(ctx context.Context) context.Context {
@@ -24,7 +28,7 @@ func WithUnifiedDelay(ctx context.Context) context.Context {
 
 func unifiedURLTest(ctx context.Context, link string, detour N.Dialer) (uint16, error) {
 	if link == "" {
-		link = "https://www.gstatic.com/generate_204"
+		link = DefaultUnifiedTestURL
 	}
 	ctx, cancel := context.WithTimeout(ctx, C.TCPTimeout)
 	defer cancel()

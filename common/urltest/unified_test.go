@@ -37,6 +37,23 @@ func (*latencyTestDialer) ListenPacket(context.Context, M.Socksaddr) (net.Packet
 	return nil, errors.New("unexpected UDP")
 }
 
+func TestUnifiedDelayDefaultTarget(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodHead || r.Host != "cp.cloudflare.com" || r.URL.RequestURI() != "/generate_204" {
+			t.Errorf("unexpected default probe: %s %s %s", r.Method, r.Host, r.URL.RequestURI())
+		}
+		requests.Add(1)
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+	d := &latencyTestDialer{address: server.Listener.Addr().String()}
+	_, err := URLTest(WithUnifiedDelay(context.Background()), "", d)
+	if err != nil || requests.Load() != 2 || d.dials.Load() != 1 {
+		t.Fatalf("default probe: requests=%d dials=%d err=%v", requests.Load(), d.dials.Load(), err)
+	}
+}
+
 func TestUnifiedDelayReusesFullOutbound(t *testing.T) {
 	var requests atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
